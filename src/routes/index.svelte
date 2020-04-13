@@ -3,13 +3,16 @@
 </style>
 
 <script>
+  import { goto } from '@sapper/app'
+  
   let email = null
   let password = 'user123'
 
   async function login () {
-    const res = await fetch('http://localhost:2000/session', {
+    await fetch('http://localhost:2000/session', {
       method: 'POST',
       mode: 'cors',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -18,6 +21,8 @@
         password
       })
     })
+
+    window.location.href= 'profile' 
   }
 </script>
 

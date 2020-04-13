@@ -10,11 +10,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@hapi/hapi": "^19.1.1",
     "hapi-auth-jwt2": "^10.0.0",
     "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
+    "@hapi/hapi": "^19.1.1",
     "@hapi/joi": "^17.1.1"
   }
 }
