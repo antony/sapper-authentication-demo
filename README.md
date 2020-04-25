@@ -2,8 +2,6 @@
 
 A demonstration of Authentication with Sapper
 
-** CURRENTLY A WORK IN PROGRESS **
-
 Includes:
 
 * JWT
