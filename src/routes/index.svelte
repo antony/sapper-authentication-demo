@@ -4,7 +4,7 @@
   const { session } = stores()
   
   let email = null
-  let password = 'user123'
+  let password = ''
 
   async function login () {
     await fetch('http://localhost:2000/session', {
@@ -42,4 +42,5 @@
 <input type="password" bind:value={password} />
 <button type="button" disabled={!email} on:click={login}>Log in</button>
 </form>
+<p><small>Hint: the default password is user123</small></p>
 {/if}
