@@ -1,13 +1,21 @@
-<script>
-  import { stores } from '@sapper/app'
-  const { session } = stores()
+<script context="module">
+  import { protectRoute } from "../lib/protectRoute";
+  import { goto } from "@sapper/app";
+
+  export async function preload(page, session) {
+    const redirectTo = protectRoute(page.path, session.profile);
+    if (redirectTo) {
+      goto(redirectTo);
+    }
+  }
 </script>
 
-{#if $session.authenticated}
-  {#if $session.profile.roles.includes('admin')}
-    <h1>Site Admin</h1>
-    <p>You are all powerful.</p>
-  {:else}
-    <h1>Go away you non-admin!</h1>
-  {/if}
-{/if}
+<script>
+  import Protected from '../components/Protected.svelte'
+</script>
+
+<Protected role="admin">
+  <h1>Site Admin</h1>
+
+  <p>You are all powerful.</p>
+</Protected>

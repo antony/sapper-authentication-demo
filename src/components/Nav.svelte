@@ -73,7 +73,8 @@
       <li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li>
       {#if $session.profile.roles.includes('owner')}
         <li><a aria-current='{segment === "organisation" ? "page" : undefined}' href='organisation'>my organisation</a></li>
-      {:else if $session.profile.roles.includes('admin')}
+			{/if}
+      {#if $session.profile.roles.includes('admin')}
         <li><a aria-current='{segment === "admin" ? "page" : undefined}' href='admin'>admin tools</a></li>
       {/if}
     {/if}

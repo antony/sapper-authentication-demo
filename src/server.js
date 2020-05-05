@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser'
 import passport from 'passport';
 import { Strategy as KeycloakStrategy } from 'passport-keycloak-oauth2-oidc';
 import config from './config.js'
+import { protectRoute } from './lib/protectRoute'
 
 const { PORT, NODE_ENV } = process.env
 const dev = NODE_ENV === 'development'
@@ -56,6 +57,11 @@ express()
       const token = req.cookies[authTokenCookieKey]
       const profile = token ? jwt.decode(token) : false
 
+      const redirectTo = protectRoute(req.url, profile)
+      if (redirectTo) {
+        return res.redirect(redirectTo)
+      }
+
       return sapper.middleware({
         session: () => {
           return {
@@ -65,7 +71,7 @@ express()
         }
       })(req, res, next)
     }
-	)
-	.listen(PORT, err => {
-		if (err) console.log('error', err)
-	})
+  )
+  .listen(PORT, err => {
+    if (err) console.log('error', err)
+  })
