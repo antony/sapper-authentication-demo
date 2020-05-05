@@ -76,14 +76,11 @@ module.exports = [
 
       return checkPassword(user.name, password).then(async (match) => {
         if (match) {
-          if (match) {
-            const jwt = await createJsonWebToken(user)
-            return h
-              .response()
-              .state('my-jwt', jwt, cookieConfig)
-              .code(201)
-          }
-          return h.response().code(401)
+          const jwt = await createJsonWebToken(user)
+          return h
+            .response()
+            .state('my-jwt', jwt, cookieConfig)
+            .code(201)
         } else {
           console.error('Bad username or password')
           return h.response().code(401)
