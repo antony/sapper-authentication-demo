@@ -75,18 +75,16 @@ module.exports = [
       const user = usersDatabase.find(u => u.email === email)
 
       const match = await checkPassword(user.name, password)
-      // await checkPassword(user.name, password).then(async (match) => {
-        if (match) {
-          const jwt = await createJsonWebToken(user)
-          return h
-            .response()
-            .state('my-jwt', jwt, cookieConfig)
-            .code(201)
-        } else {
-          console.error('Bad username or password')
-          return h.response().code(401)
-        }
-      // })
+      if (match) {
+        const jwt = await createJsonWebToken(user)
+        return h
+          .response()
+          .state('my-jwt', jwt, cookieConfig)
+          .code(201)
+      } else {
+        console.error('Bad username or password')
+        return h.response().code(401)
+      }
     }
   },
   {
