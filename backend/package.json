@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "bcrypt": "^4.0.1",
+    "bcryptjs": "^2.4.3",
     "hapi-auth-jwt2": "^10.0.0",
     "jsonwebtoken": "^8.5.1"
   },

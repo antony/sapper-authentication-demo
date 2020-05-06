@@ -2,7 +2,7 @@
 
 const Joi = require('@hapi/joi')
 const { createJsonWebToken, cookieConfig } = require('./auth')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 
 const usersDatabase = [
   {
@@ -74,7 +74,8 @@ module.exports = [
       const { email, password } = request.payload
       const user = usersDatabase.find(u => u.email === email)
 
-      return checkPassword(user.name, password).then(async (match) => {
+      const match = await checkPassword(user.name, password)
+      // await checkPassword(user.name, password).then(async (match) => {
         if (match) {
           const jwt = await createJsonWebToken(user)
           return h
@@ -85,7 +86,7 @@ module.exports = [
           console.error('Bad username or password')
           return h.response().code(401)
         }
-      })
+      // })
     }
   },
   {

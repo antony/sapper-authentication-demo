@@ -4,7 +4,7 @@
   const { session } = stores()
   
   let email = null
-  let password = ''
+  let password = null
 
   async function login () {
     await fetch('http://localhost:2000/session', {
