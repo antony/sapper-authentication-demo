@@ -25,14 +25,11 @@ const usersDatabase = [
   }
 ]
 
-function storeHashedPassword(username, password) {
+function storeHashedPassword(user, password) {
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) {
       console.error(`Error hashing password for ${username}`)
     } else {
-      let user = usersDatabase.find((user) => {
-        return user.name == username
-      })
       if (!user) {
         console.error(`User ${username} not found`)
       } else {
@@ -42,10 +39,7 @@ function storeHashedPassword(username, password) {
   })
 }
 
-function checkPassword (username, password) {
-  let user = usersDatabase.find((user) => {
-    return user.name == username
-  })
+function checkPassword (user, password) {
   if (!user) {
     console.error(`User ${username} not found`)
     return false
@@ -55,7 +49,7 @@ function checkPassword (username, password) {
 }
 
 usersDatabase.forEach((user) => {
-  storeHashedPassword(user.name, 'user123')
+  storeHashedPassword(user, 'user123')
 })
 
 module.exports = [
@@ -74,7 +68,7 @@ module.exports = [
       const { email, password } = request.payload
       const user = usersDatabase.find(u => u.email === email)
 
-      const match = await checkPassword(user.name, password)
+      const match = await checkPassword(user, password)
       if (match) {
         const jwt = await createJsonWebToken(user)
         return h
