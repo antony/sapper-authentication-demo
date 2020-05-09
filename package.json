@@ -3,9 +3,7 @@
   "description": "TODO",
   "version": "0.0.1",
   "scripts": {
-    "dev": "run-p dev:**",
-    "dev:client": "sapper dev",
-    "dev:server": "node backend/server",
+    "dev": "sapper dev",
     "build": "sapper build --legacy",
     "export": "sapper export --legacy",
     "start": "node __sapper__/build",
@@ -15,7 +13,9 @@
   },
   "dependencies": {
     "compression": "^1.7.1",
-    "polka": "next",
+    "express": "^4.17.1",
+    "passport": "^0.4.1",
+    "passport-keycloak-oauth2-oidc": "^1.0.3",
     "sirv": "^0.4.0"
   },
   "devDependencies": {

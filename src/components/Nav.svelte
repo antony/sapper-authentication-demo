@@ -1,7 +1,19 @@
 <script>
-  import { stores } from '@sapper/app'
-  
-  const { session } = stores()
+	import config from '../config.js'
+  import { goto, stores } from '@sapper/app'
+
+  const { keycloak } = config
+	const { session } = stores()
+	let redirect = ""
+	if (typeof document !== 'undefined') {
+		redirect = `?redirect_uri=${encodeURI(document.location.origin)}/auth/logout`
+	}
+	const logoutURL = `${keycloak.authServerURL}/realms/${keycloak.realm}/protocol/openid-connect/logout${redirect}`
+
+	const logout = () => {
+		session.set({ authenticated: false, profile: null })
+		goto(logoutURL)
+	}
 
   export let segment
 </script>
@@ -59,16 +71,16 @@
 		<li><a aria-current='{segment === undefined ? "page" : undefined}' href='.'>home</a></li>
     {#if $session.authenticated}
       <li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li>
-      {#if $session.profile.scope.includes('owner')}
+      {#if $session.profile.roles.includes('owner')}
         <li><a aria-current='{segment === "organisation" ? "page" : undefined}' href='organisation'>my organisation</a></li>
-      {:else if $session.profile.scope.includes('admin')}
+      {:else if $session.profile.roles.includes('admin')}
         <li><a aria-current='{segment === "admin" ? "page" : undefined}' href='admin'>admin tools</a></li>
       {/if}
     {/if}
 	</ul>
   <ul>
     {#if $session.authenticated}
-    <li><a href='logout'>log out</a></li>
+    <li><a href={logoutURL} on:click|once|preventDefault={logout}>log out</a></li>
     {/if}
   </ul>
 </nav>

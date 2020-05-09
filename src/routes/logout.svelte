@@ -1,7 +1,11 @@
 <script context="module">
+  import config from '../config.js'
+
+  const { keycloak } = config
+
   export async function preload (page, session) {
-    await this.fetch('http://localhost:2000/session', {
-      method: 'DELETE',
+    await this.fetch(`${keycloak.authServerURL}/realms/${keycloak.realm}/protocol/openid-connect/logout`, {
+      method: 'POST',
       mode: 'cors',
       credentials: 'include',
       headers: {
