@@ -1,3 +1,14 @@
+<script context="module">
+  import { protectRoute } from "../lib/protectRoute";
+  import { goto } from "@sapper/app";
+  export async function preload(page, session) {
+    const redirectTo = protectRoute(page.path, session.profile);
+    if (redirectTo) {
+      goto(redirectTo);
+    }
+  }
+</script>
+
 <script>
   import Error from './Error.svelte'
   import { stores } from '@sapper/app'
