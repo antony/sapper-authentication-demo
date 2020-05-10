@@ -9,6 +9,10 @@ const PROTECTED_ROUTES = {
   }
 }
 
+export function getRole (url) {
+  return PROTECTED_ROUTES[url].role
+}
+
 export function protectRoute (url, profile) {
   const options = PROTECTED_ROUTES[url]
   if (!options) {
