@@ -35,20 +35,20 @@ passport.deserializeUser(function (obj, cb) {
 
 express()
   .use(passport.initialize())
-  .get('/auth/login', passport.authenticate('keycloak', { scope: ['openid', 'email'] }))
+  .get('/auth/login', passport.authenticate('keycloak', { scope: ['openid'] }))
   .get('/auth/callback',
     passport.authenticate('keycloak', {failureRedirect: '/login'}),
     (req, res) => {
       res.cookie(authTokenCookieKey, req.user.accessToken)
       res.redirect('/');
     })
-  .get('/auth/logout', function(req, res){
-      req.logout();
+  .get('/auth/logout', function(req, res) {
       res.cookie(authTokenCookieKey, '', {
         domain: req.hostname,
         maxAge: 0,
         overwrite: true,
       });
+      req.logout();
       res.redirect('/');
     })
 	.use(
@@ -57,12 +57,40 @@ express()
     cookieParser(),
     (req, res, next) => {
       const token = req.cookies[authTokenCookieKey]
-      const profile = token ? jwt.decode(token) : false
+      const user = token ? jwt.decode(token) : false
+
+      // sapper-rbac expects res.user.scope to exist and contain user's roles
+      // but that's a reserved field in Keycloak.
+      //
+      // Instead move `scope` to `requestedScope`, and map
+      // any roles (realm or client) to `scope`.
+      //
+      // Roles are only available when the client has
+      // a mapper
+      //
+      // Ex.
+      // - name: clientRoles
+      //   protocolMapper: oidc-usermodel-client-role-mapper
+      //   config:
+      //     access.token.claim: "true"
+      //     claim.name: clientRoles
+      //     jsonType.label: String
+      //     multivalued: "true"
+      // - name: roles
+      //   protocolMapper: oidc-usermodel-realm-role-mapper
+      //   config:
+      //     access.token.claim: "true"
+      //     claim.name: roles
+      //     jsonType.label: String
+      //     multivalued: "true"
+
+      let clientRoles = user.clientRoles || []
+      let roles = user.roles || []
 
       res.user = {
-        ...profile,
-        requestedScope: profile.scope,
-        scope: [...profile.roles, ...profile.scopes]
+        ...user,
+        requestedScope: user.scope,
+        scope: [...new Set([...clientRoles, ...roles])]
       }
 
       next()
@@ -81,7 +109,7 @@ express()
           return sapper.middleware({
             session: () => {
               return {
-                authenticated: !!res.user,
+                authenticated: !!user,
                 user: res.user
               }
             }
