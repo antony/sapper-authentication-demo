@@ -1,20 +1,20 @@
-<h1>{profile.username}</h1>
-
-<h2>My Roles</h2>
-<ul>
-  {#each profile.roles as role}
-  <li>{role}</li>
-  {/each}
-</ul>
-
 <script context="module">
   export async function preload (page, session) {
     return {
-      profile: session.profile
+      user: session.user
     }
   }
 </script>
 
 <script>
-  export let profile
+  export let user
 </script>
+
+<h1>{user.username}</h1>
+
+<h2>My Scopes</h2>
+<ul>
+  {#each user.scope as scope}
+  <li>{scope}</li>
+  {/each}
+</ul>

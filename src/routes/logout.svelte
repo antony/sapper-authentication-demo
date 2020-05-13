@@ -20,7 +20,7 @@
 
   const { session } = stores()
 
-  session.set({ authenticated: false, profile: null })
+  session.set({ authenticated: false, user: null })
 
   goto('/')
 </script>

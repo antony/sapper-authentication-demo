@@ -8,7 +8,7 @@
 </svelte:head>
 
 {#if $session.authenticated}
-<p>You are logged in as {$session.profile.username}</p>
+<p>You are logged in as {$session.user.username}</p>
 {:else}
 <p><a href="/auth/login">Login</a> to access</p>
 {/if}

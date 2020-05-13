@@ -7,7 +7,9 @@ import cookieParser from 'cookie-parser'
 import passport from 'passport';
 import { Strategy as KeycloakStrategy } from 'passport-keycloak-oauth2-oidc';
 import config from './config.js'
-import { protectRoute } from './lib/protectRoute'
+// import { protectRoute } from './lib/protectRoute'
+import { guard } from '@beyonk/sapper-rbac'
+import routes from './routes.js'
 
 const { PORT, NODE_ENV } = process.env
 const dev = NODE_ENV === 'development'
@@ -33,7 +35,7 @@ passport.deserializeUser(function (obj, cb) {
 
 express()
   .use(passport.initialize())
-  .get('/auth/login', passport.authenticate('keycloak', { scope: ['openid', 'email', 'profile', 'roles'] }))
+  .get('/auth/login', passport.authenticate('keycloak', { scope: ['openid', 'email'] }))
   .get('/auth/callback',
     passport.authenticate('keycloak', {failureRedirect: '/login'}),
     (req, res) => {
@@ -57,19 +59,36 @@ express()
       const token = req.cookies[authTokenCookieKey]
       const profile = token ? jwt.decode(token) : false
 
-      const redirectTo = protectRoute(req.url, profile)
-      if (redirectTo) {
-        return res.redirect(redirectTo)
+      res.user = {
+        ...profile,
+        requestedScope: profile.scope,
+        scope: [...profile.roles, ...profile.scopes]
       }
 
-      return sapper.middleware({
-        session: () => {
-          return {
-            authenticated: !!profile,
-            profile
-          }
+      next()
+    },
+    (req, res, next) => {
+      const token = req.cookies[authTokenCookieKey]
+      const user = token ? jwt.decode(token) : false
+
+      const options = {
+        routes,
+        deny: () => {
+          res.redirect('/')
+          return res.end()
+        },
+        grant: () => {
+          return sapper.middleware({
+            session: () => {
+              return {
+                authenticated: !!res.user,
+                user: res.user
+              }
+            }
+          })(req, res, next)
         }
-      })(req, res, next)
+      }
+      return guard(req.path, user, options)
     }
   )
   .listen(PORT, err => {

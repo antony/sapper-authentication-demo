@@ -11,7 +11,7 @@
 	const logoutURL = `${keycloak.authServerURL}/realms/${keycloak.realm}/protocol/openid-connect/logout${redirect}`
 
 	const logout = () => {
-		session.set({ authenticated: false, profile: null })
+		session.set({ authenticated: false, user: null })
 		goto(logoutURL)
 	}
 
@@ -71,10 +71,10 @@
 		<li><a aria-current='{segment === undefined ? "page" : undefined}' href='.'>home</a></li>
     {#if $session.authenticated}
       <li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li>
-      {#if $session.profile.roles.includes('owner')}
+      {#if $session.user.scope.includes('owner')}
         <li><a aria-current='{segment === "organisation" ? "page" : undefined}' href='organisation'>my organisation</a></li>
 			{/if}
-      {#if $session.profile.roles.includes('admin')}
+      {#if $session.user.scope.includes('admin')}
         <li><a aria-current='{segment === "admin" ? "page" : undefined}' href='admin'>admin tools</a></li>
       {/if}
     {/if}

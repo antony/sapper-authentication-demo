@@ -1,9 +1,4 @@
-<script>
-  import Protected from '../components/Protected.svelte'
-</script>
+<h1>Site Admin</h1>
 
-<Protected>
-  <h1>Site Admin</h1>
+<p>You are all powerful.</p>
 
-  <p>You are all powerful.</p>
-</Protected>

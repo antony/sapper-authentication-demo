@@ -1,10 +1,5 @@
-<script>
-  import Protected from '../components/Protected.svelte'
-</script>
+<h1>My Organisation</h1>
 
-<Protected>
-  <h1>My Organisation</h1>
+<p>Stuff.</p>
 
-  <p>Stuff.</p>
-</Protected>
 
