@@ -13,12 +13,19 @@ const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 
 const onwarn = (warning, onwarn) => (warning.code === 'CIRCULAR_DEPENDENCY' && /[/\\]@sapper[/\\]/.test(warning.message)) || onwarn(warning);
 
+const sapperEnv = Object.keys(process.env).filter(key => key.includes('SAPPER_') && ! key.includes('SAPPER_LEGACY_BUILD'))
+  .reduce((acc, key) => ({
+    ...acc,
+    [`process.env.${key}`]: JSON.stringify(process.env[key])
+  }), {})
+
 export default {
 	client: {
 		input: config.client.input(),
 		output: config.client.output(),
 		plugins: [
 			replace({
+				...sapperEnv,
 				'process.browser': true,
 				'process.env.NODE_ENV': JSON.stringify(mode)
 			}),
