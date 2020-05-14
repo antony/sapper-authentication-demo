@@ -8,7 +8,11 @@
   const options = {
     routes,
     deny: () => {
-			goto("/")
+			const page = $page.path
+      console.log('Access to page denied', page)
+      
+      // if page === 'special' do something else
+      return goto("/")
 		}
     // we don't specify grant here, since we don't need to do anything.
   };

@@ -3,18 +3,15 @@ import express from 'express';
 import compression from 'compression'
 import * as sapper from '@sapper/server'
 import jwt from 'jsonwebtoken'
-import cookieParser from 'cookie-parser'
 import passport from 'passport';
 import { Strategy as KeycloakStrategy } from 'passport-keycloak-oauth2-oidc';
 import config from './config.js'
-// import { protectRoute } from './lib/protectRoute'
 import { guard } from '@beyonk/sapper-rbac'
 import routes from './routes.js'
+import cookieSession from 'cookie-session'
 
 const { PORT, NODE_ENV } = process.env
 const dev = NODE_ENV === 'development'
-
-const authTokenCookieKey = 'keycloak-access-token'
 
 passport.use(
   new KeycloakStrategy(config.keycloak,
@@ -25,84 +22,71 @@ passport.use(
   )
 );
 
-passport.serializeUser(function (user, cb) {
-  cb(null, user);
+passport.serializeUser(function(user, cb) {
+  const profile = jwt.decode(user.accessToken)
+  let clientRoles = profile.clientRoles || []
+  let roles = profile.roles || []
+  const serializedUser = {
+    username: profile.username,
+    scope: [...new Set([...clientRoles, ...roles])],
+    accessToken: user.accessToken
+  }
+  cb(null, serializedUser);
 });
 
-passport.deserializeUser(function (obj, cb) {
+passport.deserializeUser(function(obj, cb) {
   cb(null, obj);
 });
 
 express()
+  .use(
+    cookieSession({
+      maxAge: 24 * 60 * 60 * 1000,
+      keys: config.sessionKey
+    })
+  )
   .use(passport.initialize())
-  .get('/auth/login', passport.authenticate('keycloak', { scope: ['openid'] }))
-  .get('/auth/callback',
-    passport.authenticate('keycloak', {failureRedirect: '/login'}),
+  .use(passport.session())
+  .get(
+    "/auth/login",
+    passport.authenticate("keycloak", {
+      scope: ["openid", "email", "profile", "roles"]
+    })
+  )
+  .get(
+    "/auth/callback",
+    passport.authenticate("keycloak", { failureRedirect: "/login" }),
     (req, res) => {
-      res.cookie(authTokenCookieKey, req.user.accessToken)
-      res.redirect('/');
-    })
-  .get('/auth/logout', function(req, res) {
-      res.cookie(authTokenCookieKey, '', {
-        domain: req.hostname,
-        maxAge: 0,
-        overwrite: true,
-      });
-      req.logout();
-      res.redirect('/');
-    })
+      res.redirect("/");
+    }
+  )
+  .get("/auth/logout", function(req, res) {
+    req.logout();
+    req.session = null
+    res.redirect('/')
+  })
 	.use(
 		compression({ threshold: 0 }),
     sirv('static', { dev }),
-    cookieParser(),
     (req, res, next) => {
-      const token = req.cookies[authTokenCookieKey]
-      const user = token ? jwt.decode(token) : false
-
-      // sapper-rbac expects res.user.scope to exist and contain user's roles
-      // but that's a reserved field in Keycloak.
-      //
-      // Instead move `scope` to `requestedScope`, and map
-      // any roles (realm or client) to `scope`.
-      //
-      // Roles are only available when the client has
-      // a mapper
-      //
-      // Ex.
-      // - name: clientRoles
-      //   protocolMapper: oidc-usermodel-client-role-mapper
-      //   config:
-      //     access.token.claim: "true"
-      //     claim.name: clientRoles
-      //     jsonType.label: String
-      //     multivalued: "true"
-      // - name: roles
-      //   protocolMapper: oidc-usermodel-realm-role-mapper
-      //   config:
-      //     access.token.claim: "true"
-      //     claim.name: roles
-      //     jsonType.label: String
-      //     multivalued: "true"
-
-      let clientRoles = user.clientRoles || []
-      let roles = user.roles || []
-
-      res.user = {
-        ...user,
-        requestedScope: user.scope,
-        scope: [...new Set([...clientRoles, ...roles])]
-      }
-
-      next()
-    },
-    (req, res, next) => {
-      const token = req.cookies[authTokenCookieKey]
-      const user = token ? jwt.decode(token) : false
+      const user = req.user
 
       const options = {
         routes,
         deny: () => {
-          res.redirect('/')
+          const page = req.path
+          console.log('Access to page denied', page)
+
+          // if not authenticated, send to login
+          if (! user) {
+            console.log('user is not authenticated')
+            res.redirect('/auth/login')
+          } else {
+            res.redirect('/')
+          }
+
+          // if page === '/special' do something else
+          
           return res.end()
         },
         grant: () => {
@@ -110,7 +94,7 @@ express()
             session: () => {
               return {
                 authenticated: !!user,
-                user: res.user
+                user
               }
             }
           })(req, res, next)

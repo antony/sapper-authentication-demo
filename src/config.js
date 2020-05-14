@@ -7,5 +7,6 @@ export default {
     sslRequired: 'external',
     publicClient: false,
     callbackURL: `/auth/callback`
-  }
+  },
+  sessionKey: ['in prod use a random string here']
 }
