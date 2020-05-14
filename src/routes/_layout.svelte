@@ -8,17 +8,17 @@
   const options = {
     routes,
     deny: () => {
-			const page = $page.path
-      console.log('Access to page denied', page)
-      
+      const page = $page.path;
+      console.log("Access to page denied", page);
+
       // if page === 'special' do something else
-      return goto("/")
-		}
+      return goto("/");
+    },
     // we don't specify grant here, since we don't need to do anything.
   };
   // Listen to the page store.
-  page.subscribe(async v => {
-		await tick(); // let the previous routing finish first.
+  page.subscribe(async (v) => {
+    await tick(); // let the previous routing finish first.
     guard(v.path, $session.user, options);
   });
   export let segment;

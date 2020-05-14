@@ -22,7 +22,7 @@ passport.use(
   )
 );
 
-passport.serializeUser(function(user, cb) {
+passport.serializeUser(function (user, cb) {
   const profile = jwt.decode(user.accessToken)
   let clientRoles = profile.clientRoles || []
   let roles = profile.roles || []
@@ -34,7 +34,7 @@ passport.serializeUser(function(user, cb) {
   cb(null, serializedUser);
 });
 
-passport.deserializeUser(function(obj, cb) {
+passport.deserializeUser(function (obj, cb) {
   cb(null, obj);
 });
 
@@ -60,13 +60,13 @@ express()
       res.redirect("/");
     }
   )
-  .get("/auth/logout", function(req, res) {
+  .get("/auth/logout", function (req, res) {
     req.logout();
     req.session = null
     res.redirect('/')
   })
-	.use(
-		compression({ threshold: 0 }),
+  .use(
+    compression({ threshold: 0 }),
     sirv('static', { dev }),
     (req, res, next) => {
       const user = req.user
@@ -78,7 +78,7 @@ express()
           console.log('Access to page denied', page)
 
           // if not authenticated, send to login
-          if (! user) {
+          if (!user) {
             console.log('user is not authenticated')
             res.redirect('/auth/login')
           } else {
@@ -86,7 +86,7 @@ express()
           }
 
           // if page === '/special' do something else
-          
+
           return res.end()
         },
         grant: () => {
