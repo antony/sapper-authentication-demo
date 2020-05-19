@@ -11,3 +11,5 @@ Includes:
 ## Usage
 
 `npm run dev`
+
+Hapi 19 supports only node.js 12 or later, for earlier node.js versions try `npm i @hapi/hapi@18.4.1`.
