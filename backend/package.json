@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "hapi-auth-jwt2": "^10.0.0",
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^9.0.0"
   },
   "devDependencies": {
     "@hapi/hapi": "^19.1.1",
